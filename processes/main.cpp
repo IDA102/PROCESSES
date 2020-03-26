@@ -5,17 +5,23 @@ enum management_teams { Start, Stop, Restart };
 
 //Функция запуска службы 
 bool START_SERVICE(SC_HANDLE &descriptor)
-
 {
-	BOOL ret = StartService(descriptor, NULL, NULL);
+	BOOL ret = StartService(descriptor, NULL, NULL);//3
 	return ret;
+	/*
+	Здесь не нужно ожидать ответа от функции или обновления службы как в "ControlService" f STOP_SERVICE, т.к. функция сама ожидает гарантированного запуска службы
+	и единственная ошибка которая может произойти, это ошибка времени запуска(ждёт 20 сек + можно опрашиваь состояние, запустилась или нет). 
+	Цититрую "Когда запускается сервисный драйвер, функция StartService не возвращает значение до тех пор, пока драйвер устройства не  закончит инициализацию."
+	*/
 }
 
 //Функция остановки службы
 bool STOP_SERVICE(SC_HANDLE &descriptor)
-{
+{//GetLastError это ОС зависимая функция, коды возврата могут не совпадать при слвпадении причины ошибки
 	SERVICE_STATUS status;
 	BOOL ret = ControlService(descriptor, SERVICE_CONTROL_STOP, &status);
+	if (ret) { while (!((status.dwCurrentState != 1)^(status.dwCurrentState != 3))); }
+	if (!ret) { DWORD GLE = GetLastError(); if ((GLE == 3435973836) || (GLE == 1062)) return true; }/*3435973836 и 1062<--- это значение ошибки, если произошла попытка остановить уже остановленную службу*/
 	return ret;
 }
 
@@ -25,6 +31,7 @@ int RESTART_SERVICE(SC_HANDLE &descriptor)
 	int k = 0;
 	if (!STOP_SERVICE(descriptor)) { k = 2; return k;	}
 	if (!START_SERVICE(descriptor)) { k = 1; return k;	}
+	return k;
 }
 
 int main()
@@ -161,10 +168,6 @@ int main()
 			stop		
 		}
 
-
-
-
-
 		//Запускаем службу
 		discriptor_service = OpenService(discriptor, SERVICE_BUFER[0].lpServiceName, SERVICE_ALL_ACCESS);
 		int k = START_SERVICE(discriptor_service);
@@ -186,12 +189,6 @@ int main()
 		int err =  RESTART_SERVICE(discriptor_service);
 		CloseServiceHandle(discriptor_service);
 		stop
-
-
-
-
-
-
 
 		LocalFree(SERVICE_BUFER);
 
