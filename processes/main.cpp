@@ -3,29 +3,29 @@
 enum status { Running, Stopping, Paused };
 enum management_teams { Start, Stop, Restart };
 
-//Функция запуска службы 
+//Р¤СѓРЅРєС†РёСЏ Р·Р°РїСѓСЃРєР° СЃР»СѓР¶Р±С‹ 
 bool START_SERVICE(SC_HANDLE &descriptor)
 {
 	BOOL ret = StartService(descriptor, NULL, NULL);//3
 	return ret;
 	/*
-	Здесь не нужно ожидать ответа от функции или обновления службы как в "ControlService" f STOP_SERVICE, т.к. функция сама ожидает гарантированного запуска службы
-	и единственная ошибка которая может произойти, это ошибка времени запуска(ждёт 20 сек + можно опрашиваь состояние, запустилась или нет). 
-	Цититрую "Когда запускается сервисный драйвер, функция StartService не возвращает значение до тех пор, пока драйвер устройства не  закончит инициализацию."
+	Р—РґРµСЃСЊ РЅРµ РЅСѓР¶РЅРѕ РѕР¶РёРґР°С‚СЊ РѕС‚РІРµС‚Р° РѕС‚ С„СѓРЅРєС†РёРё РёР»Рё РѕР±РЅРѕРІР»РµРЅРёСЏ СЃР»СѓР¶Р±С‹ РєР°Рє РІ "ControlService" f STOP_SERVICE, С‚.Рє. С„СѓРЅРєС†РёСЏ СЃР°РјР° РѕР¶РёРґР°РµС‚ РіР°СЂР°РЅС‚РёСЂРѕРІР°РЅРЅРѕРіРѕ Р·Р°РїСѓСЃРєР° СЃР»СѓР¶Р±С‹
+	Рё РµРґРёРЅСЃС‚РІРµРЅРЅР°СЏ РѕС€РёР±РєР° РєРѕС‚РѕСЂР°СЏ РјРѕР¶РµС‚ РїСЂРѕРёР·РѕР№С‚Рё, СЌС‚Рѕ РѕС€РёР±РєР° РІСЂРµРјРµРЅРё Р·Р°РїСѓСЃРєР°(Р¶РґС‘С‚ 20 СЃРµРє + РјРѕР¶РЅРѕ РѕРїСЂР°С€РёРІР°С‚СЊ СЃРѕСЃС‚РѕСЏРЅРёРµ, Р·Р°РїСѓСЃС‚РёР»Р°СЃСЊ РёР»Рё РЅРµС‚). 
+	Р¦РёС‚РёС‚СЂСѓСЋ "РљРѕРіРґР° Р·Р°РїСѓСЃРєР°РµС‚СЃСЏ СЃРµСЂРІРёСЃРЅС‹Р№ РґСЂР°Р№РІРµСЂ, С„СѓРЅРєС†РёСЏ StartService РЅРµ РІРѕР·РІСЂР°С‰Р°РµС‚ Р·РЅР°С‡РµРЅРёРµ РґРѕ С‚РµС… РїРѕСЂ, РїРѕРєР° РґСЂР°Р№РІРµСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР° РЅРµ  Р·Р°РєРѕРЅС‡РёС‚ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЋ."
 	*/
 }
 
-//Функция остановки службы
+//Р¤СѓРЅРєС†РёСЏ РѕСЃС‚Р°РЅРѕРІРєРё СЃР»СѓР¶Р±С‹
 bool STOP_SERVICE(SC_HANDLE &descriptor)
-{//GetLastError это ОС зависимая функция, коды возврата могут не совпадать при слвпадении причины ошибки
+{//GetLastError СЌС‚Рѕ РћРЎ Р·Р°РІРёСЃРёРјР°СЏ С„СѓРЅРєС†РёСЏ, РєРѕРґС‹ РІРѕР·РІСЂР°С‚Р° РјРѕРіСѓС‚ РЅРµ СЃРѕРІРїР°РґР°С‚СЊ РїСЂРё СЃР»РІРїР°РґРµРЅРёРё РїСЂРёС‡РёРЅС‹ РѕС€РёР±РєРё
 	SERVICE_STATUS status;
 	BOOL ret = ControlService(descriptor, SERVICE_CONTROL_STOP, &status);
 	if (ret) { while (!((status.dwCurrentState != 1)^(status.dwCurrentState != 3))); }
-	if (!ret) { DWORD GLE = GetLastError(); if ((GLE == 3435973836) || (GLE == 1062)) return true; }/*3435973836 и 1062<--- это значение ошибки, если произошла попытка остановить уже остановленную службу*/
+	if (!ret) { DWORD GLE = GetLastError(); if ((GLE == 3435973836) || (GLE == 1062)) return true; }/*3435973836 Рё 1062<--- СЌС‚Рѕ Р·РЅР°С‡РµРЅРёСЏ РІРѕР·РјРѕР¶РЅС‹С… РѕС€РёР±РѕРє, РµСЃР»Рё РїСЂРѕРёР·РѕС€Р»Р° РїРѕРїС‹С‚РєР° РѕСЃС‚Р°РЅРѕРІРёС‚СЊ СѓР¶Рµ РѕСЃС‚Р°РЅРѕРІР»РµРЅРЅСѓСЋ СЃР»СѓР¶Р±Сѓ*/
 	return ret;
 }
 
-//Функция перезапуска службы
+//Р¤СѓРЅРєС†РёСЏ РїРµСЂРµР·Р°РїСѓСЃРєР° СЃР»СѓР¶Р±С‹
 int RESTART_SERVICE(SC_HANDLE &descriptor)
 {
 	int k = 0;
@@ -48,23 +48,23 @@ int main()
 		status STATUS;
 	};
  
-	SC_HANDLE discriptor = nullptr, discriptor_service = nullptr;//Дескриптор служб локальной машины.
-	bool err_discriptor,err_config_service;//флаг ошибки
-	ENUM_SERVICE_STATUS_PROCESS *SERVICE_BUFER;//Указатель на буфер в котором содержатся стркуктуры "всех" служб
-	QUERY_SERVICE_CONFIG *SERVICE_CONFIG_BUFER;//Указатель на буфер в котором содержится стркуктура выбранной службы
-	DWORD dwBytesNeeded = 0;//Сколько тркбуется памяти в байтах для дескриптора всех процессов
-	DWORD dwBytesNeeded2 = 0;//Сколько тркбуется памяти в байтах для дескриптора одного конткретного процесса
-	DWORD dwServicesReturned = 0;//Количество возвращённых служб
+	SC_HANDLE discriptor = nullptr, discriptor_service = nullptr;//Р”РµСЃРєСЂРёРїС‚РѕСЂ СЃР»СѓР¶Р± Р»РѕРєР°Р»СЊРЅРѕР№ РјР°С€РёРЅС‹.
+	bool err_discriptor,err_config_service;//С„Р»Р°Рі РѕС€РёР±РєРё
+	ENUM_SERVICE_STATUS_PROCESS *SERVICE_BUFER;//РЈРєР°Р·Р°С‚РµР»СЊ РЅР° Р±СѓС„РµСЂ РІ РєРѕС‚РѕСЂРѕРј СЃРѕРґРµСЂР¶Р°С‚СЃСЏ СЃС‚СЂРєСѓРєС‚СѓСЂС‹ "РІСЃРµС…" СЃР»СѓР¶Р±
+	QUERY_SERVICE_CONFIG *SERVICE_CONFIG_BUFER;//РЈРєР°Р·Р°С‚РµР»СЊ РЅР° Р±СѓС„РµСЂ РІ РєРѕС‚РѕСЂРѕРј СЃРѕРґРµСЂР¶РёС‚СЃСЏ СЃС‚СЂРєСѓРєС‚СѓСЂР° РІС‹Р±СЂР°РЅРЅРѕР№ СЃР»СѓР¶Р±С‹
+	DWORD dwBytesNeeded = 0;//РЎРєРѕР»СЊРєРѕ С‚СЂРєР±СѓРµС‚СЃСЏ РїР°РјСЏС‚Рё РІ Р±Р°Р№С‚Р°С… РґР»СЏ РґРµСЃРєСЂРёРїС‚РѕСЂР° РІСЃРµС… РїСЂРѕС†РµСЃСЃРѕРІ
+	DWORD dwBytesNeeded2 = 0;//РЎРєРѕР»СЊРєРѕ С‚СЂРєР±СѓРµС‚СЃСЏ РїР°РјСЏС‚Рё РІ Р±Р°Р№С‚Р°С… РґР»СЏ РґРµСЃРєСЂРёРїС‚РѕСЂР° РѕРґРЅРѕРіРѕ РєРѕРЅС‚РєСЂРµС‚РЅРѕРіРѕ РїСЂРѕС†РµСЃСЃР°
+	DWORD dwServicesReturned = 0;//РљРѕР»РёС‡РµСЃС‚РІРѕ РІРѕР·РІСЂР°С‰С‘РЅРЅС‹С… СЃР»СѓР¶Р±
 	DWORD dwResumeHandle = 0;
 
-	//------Можно выделить буфер заранее на максимум, но это не наш метод
+	//------РњРѕР¶РЅРѕ РІС‹РґРµР»РёС‚СЊ Р±СѓС„РµСЂ Р·Р°СЂР°РЅРµРµ РЅР° РјР°РєСЃРёРјСѓРј, РЅРѕ СЌС‚Рѕ РЅРµ РЅР°С€ РјРµС‚РѕРґ
 	//LPQUERY_SERVICE_CONFIG lpqscBuf = (LPQUERY_SERVICE_CONFIG)LocalAlloc(LPTR, 4096);
 	//LPBYTE lpqscBuf = (LPBYTE)LocalAlloc(LPTR, (size_t)pcbBytesNeeded);
 
-	//Открываем дескриптор процессов
+	//РћС‚РєСЂС‹РІР°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂ РїСЂРѕС†РµСЃСЃРѕРІ
 	if (discriptor = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS))//SC_MANAGER_ENUMERATE_SERVICE
 	{
-		//Выделяем память под размер дескрипьтора (размер вернёт dwBytesNeeded)
+		//Р’С‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РїРѕРґ СЂР°Р·РјРµСЂ РґРµСЃРєСЂРёРїСЊС‚РѕСЂР° (СЂР°Р·РјРµСЂ РІРµСЂРЅС‘С‚ dwBytesNeeded)
 		err_discriptor = EnumServicesStatusEx(
 			discriptor,
 			SC_ENUM_PROCESS_INFO,
@@ -78,9 +78,9 @@ int main()
 			NULL
 		);
 
-		//Выделяем память и делаем копию дескриптора служб
+		//Р’С‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ Рё РґРµР»Р°РµРј РєРѕРїРёСЋ РґРµСЃРєСЂРёРїС‚РѕСЂР° СЃР»СѓР¶Р±
 		DWORD dwBytes = dwBytesNeeded + sizeof(ENUM_SERVICE_STATUS_PROCESS);
-		//SERVICE_BUFER = new ENUM_SERVICE_STATUS_PROCESS[dwBytes];//Если использовать эту строчку, не забудьте написать delete
+		//SERVICE_BUFER = new ENUM_SERVICE_STATUS_PROCESS[dwBytes];//Р•СЃР»Рё РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ СЌС‚Сѓ СЃС‚СЂРѕС‡РєСѓ, РЅРµ Р·Р°Р±СѓРґСЊС‚Рµ РЅР°РїРёСЃР°С‚СЊ delete
 		SERVICE_BUFER = (ENUM_SERVICE_STATUS_PROCESS*)LocalAlloc(LPTR, dwBytes);
 		if (SERVICE_BUFER == NULL)	{return FALSE;}
 
@@ -97,13 +97,13 @@ int main()
 			NULL
 		);
 
-		//Выделяем память для структур служб передаваемых в с++++
+		//Р’С‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РґР»СЏ СЃС‚СЂСѓРєС‚СѓСЂ СЃР»СѓР¶Р± РїРµСЂРµРґР°РІР°РµРјС‹С… РІ СЃ++++
 		vector<SERVICE> SERVICE_VECTOR((size_t)dwServicesReturned);
 
 		for (size_t i = 0 ; i < (size_t)dwServicesReturned; ++i)
 		{
 
-			//Открываем службу
+			//РћС‚РєСЂС‹РІР°РµРј СЃР»СѓР¶Р±Сѓ
 			try 
 			{
 				discriptor_service = OpenService(discriptor, SERVICE_BUFER[i].lpServiceName, SERVICE_ALL_ACCESS);
@@ -126,9 +126,9 @@ int main()
 				&dwBytesNeeded2
 			);
 
-			//Вытаскиваем путь путь и группу
+			//Р’С‹С‚Р°СЃРєРёРІР°РµРј РїСѓС‚СЊ РїСѓС‚СЊ Рё РіСЂСѓРїРїСѓ
 			DWORD dwBytes2 = dwBytesNeeded2 + sizeof(SERVICE_CONFIG_BUFER);
-			//SERVICE_CONFIG_BUFER = new QUERY_SERVICE_CONFIG[dwBytes2];//Если использовать эту строчку, не забудьте написать delete
+			//SERVICE_CONFIG_BUFER = new QUERY_SERVICE_CONFIG[dwBytes2];//Р•СЃР»Рё РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ СЌС‚Сѓ СЃС‚СЂРѕС‡РєСѓ, РЅРµ Р·Р°Р±СѓРґСЊС‚Рµ РЅР°РїРёСЃР°С‚СЊ delete
 			SERVICE_CONFIG_BUFER = (QUERY_SERVICE_CONFIG*)LocalAlloc(LPTR, dwBytes2);
 			if (SERVICE_BUFER == NULL) { return FALSE; }
 
@@ -139,7 +139,7 @@ int main()
 				dwBytes2,
 				&dwBytesNeeded2
 			);
-			//Заполняем вектор структур
+			//Р—Р°РїРѕР»РЅСЏРµРј РІРµРєС‚РѕСЂ СЃС‚СЂСѓРєС‚СѓСЂ
 			SERVICE_VECTOR[i].NAME = SERVICE_BUFER[i].lpServiceName;
 			SERVICE_VECTOR[i].PID = SERVICE_BUFER[i].ServiceStatusProcess.dwProcessId;
 			SERVICE_VECTOR[i].DECRIPTION = SERVICE_BUFER[i].lpDisplayName;
@@ -168,22 +168,22 @@ int main()
 			stop		
 		}
 
-		//Запускаем службу
+		//Р—Р°РїСѓСЃРєР°РµРј СЃР»СѓР¶Р±Сѓ
 		discriptor_service = OpenService(discriptor, SERVICE_BUFER[0].lpServiceName, SERVICE_ALL_ACCESS);
 		int k = START_SERVICE(discriptor_service);
 		CloseServiceHandle(discriptor_service);
 		stop
 
-		//Останавливаем службу
+		//РћСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃР»СѓР¶Р±Сѓ
 		discriptor_service = OpenService(discriptor, SERVICE_BUFER[0].lpServiceName, SERVICE_STOP);
 		k = STOP_SERVICE(discriptor_service);
 		CloseServiceHandle(discriptor_service);
 		stop
 
-		//Перезапускаем службу
+		//РџРµСЂРµР·Р°РїСѓСЃРєР°РµРј СЃР»СѓР¶Р±Сѓ
 		/*
-		Если err вернёт ошибку --- 1(ошибка запуска)
-		Если err вернёт ошибку --- 2(ошибка останоки)
+		Р•СЃР»Рё err РІРµСЂРЅС‘С‚ РѕС€РёР±РєСѓ --- 1(РѕС€РёР±РєР° Р·Р°РїСѓСЃРєР°)
+		Р•СЃР»Рё err РІРµСЂРЅС‘С‚ РѕС€РёР±РєСѓ --- 2(РѕС€РёР±РєР° РѕСЃС‚Р°РЅРѕРєРё)
 		*/
 		discriptor_service = OpenService(discriptor, SERVICE_BUFER[0].lpServiceName, SERVICE_ALL_ACCESS);
 		int err =  RESTART_SERVICE(discriptor_service);
@@ -195,6 +195,6 @@ int main()
 	}
 	else cout << "not creat descriptor" << endl;
 	stop
-	CloseServiceHandle(discriptor);//Закрываем/освобождаем дескриптор служб
+	CloseServiceHandle(discriptor);//Р—Р°РєСЂС‹РІР°РµРј/РѕСЃРІРѕР±РѕР¶РґР°РµРј РґРµСЃРєСЂРёРїС‚РѕСЂ СЃР»СѓР¶Р±
 	return 0;
 }	
